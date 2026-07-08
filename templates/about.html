@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}About - GameVerse AI{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <p class="eyebrow">Portfolio Project</p>
+        <h1>About GameVerse AI</h1>
+        <p class="lead">A production-minded Flask application for game discovery, compatibility checks, FPS summaries, recommendation APIs, and hybrid AI chat.</p>
+    </div>
+</section>
+<section class="container py-5 content-narrow">
+    <h2>How It Works</h2>
+    <p>Game data is loaded from <code>Game_Database.xlsx</code> through Pandas. The chatbot answers factual game questions from that dataset first and uses Groq for reasoning tasks such as recommendations, comparisons, and explanations.</p>
+    <h2>Deployment</h2>
+    <p>The app is ready for local Flask execution and Render deployment with Gunicorn.</p>
+</section>
+{% endblock %}

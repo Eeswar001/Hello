@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Not Found - GameVerse AI{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <p class="eyebrow">404</p>
+        <h1>Page Not Found</h1>
+        <p class="lead">The requested page does not exist in GameVerse AI.</p>
+        <a class="btn btn-accent" href="{{ url_for('home.index') }}">Return Home</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Games - GameVerse AI{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <p class="eyebrow">Explore Database</p>
+        <h1>All Games</h1>
+    </div>
+</section>
+
+<section class="container py-4">
+    <form class="filter-bar" method="get">
+        <input class="form-control" name="q" value="{{ query.search }}" placeholder="Search games">
+        <select class="form-select" name="genre">
+            <option value="">Genre</option>
+            {% for item in facets.genres %}<option value="{{ item }}" {% if query.genre == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="platform">
+            <option value="">Platform</option>
+            {% for item in facets.platforms %}<option value="{{ item }}" {% if query.platform == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="developer">
+            <option value="">Developer</option>
+            {% for item in facets.developers %}<option value="{{ item }}" {% if query.developer == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="game_mode">
+            <option value="">Mode</option>
+            {% for item in facets.game_modes %}<option value="{{ item }}" {% if query.game_mode == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="sort">
+            {% for value, label in [("alphabetical", "Alphabetical"), ("steam_rating", "Steam Rating"), ("metacritic", "Metacritic"), ("newest", "Newest"), ("oldest", "Oldest")] %}
+                <option value="{{ value }}" {% if query.sort == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-accent" type="submit">Apply</button>
+    </form>
+</section>
+
+<section class="container pb-5">
+    <div class="result-count">{{ games|length }} game{{ "" if games|length == 1 else "s" }} found</div>
+    <div class="game-grid">
+        {% for game in games %}
+            {% include "_game_card.html" %}
+        {% else %}
+            <div class="empty-state">No games match the selected filters.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

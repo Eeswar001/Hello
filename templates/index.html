@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}GameVerse AI - Intelligent Gaming Assistant{% endblock %}
+{% block content %}
+<section class="hero-band">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <p class="eyebrow">Intelligent Gaming Assistant</p>
+            <h1>GameVerse AI</h1>
+            <p class="lead">Discover games, inspect specs, estimate FPS, compare favorites, and ask a hybrid assistant that respects the local database.</p>
+            <form class="hero-search" action="{{ url_for('games.list_games') }}" method="get">
+                <input class="form-control form-control-lg" name="q" placeholder="Search by game, genre, developer, platform, or year" aria-label="Search games">
+                <button class="btn btn-accent btn-lg" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="hero-media" aria-label="Gaming collage"></div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="section-heading">
+        <h2>Featured Games</h2>
+        <a href="{{ url_for('games.list_games', sort='metacritic') }}">View all</a>
+    </div>
+    <div class="game-grid">
+        {% for game in featured_games %}
+            {% include "_game_card.html" %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="wide-band">
+    <div class="container py-5">
+        <div class="section-heading">
+            <h2>Popular Games</h2>
+            <a href="{{ url_for('games.list_games', sort='steam_rating') }}">Top rated</a>
+        </div>
+        <div class="game-grid">
+            {% for game in popular_games %}
+                {% include "_game_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="section-heading">
+        <h2>Latest Games</h2>
+        <a href="{{ url_for('games.list_games', sort='newest') }}">Newest first</a>
+    </div>
+    <div class="game-grid">
+        {% for game in latest_games %}
+            {% include "_game_card.html" %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container pb-5">
+    <h2 class="mb-3">Game Categories</h2>
+    <div class="chip-row">
+        {% for genre in facets.genres %}
+            <a class="chip" href="{{ url_for('games.list_games', genre=genre) }}">{{ genre }}</a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}{{ game.name }} - GameVerse AI{% endblock %}
+{% block content %}
+<section class="detail-hero" style="background-image: linear-gradient(90deg, rgba(5,8,18,.96), rgba(5,8,18,.58)), url('{{ game.image_url }}')">
+    <div class="container py-5">
+        <p class="eyebrow">{{ game.genre }}</p>
+        <h1>{{ game.name }}</h1>
+        <p class="lead">{{ game.story_summary }}</p>
+        <div class="rating-row">
+            <span>Steam {{ "%.1f"|format(game.steam_rating) }}/10</span>
+            <span>Metacritic {{ game.metacritic }}</span>
+            <span>{{ game.release_year }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5 detail-grid">
+    <div>
+        <h2>Game Details</h2>
+        <dl class="detail-list">
+            <div><dt>Developer</dt><dd>{{ game.developer }}</dd></div>
+            <div><dt>Publisher</dt><dd>{{ game.publisher }}</dd></div>
+            <div><dt>Release Date</dt><dd>{{ game.release_date }}</dd></div>
+            <div><dt>Platforms</dt><dd>{{ game.platforms }}</dd></div>
+            <div><dt>Engine</dt><dd>{{ game.engine }}</dd></div>
+            <div><dt>Game Mode</dt><dd>{{ game.game_mode }}</dd></div>
+        </dl>
+        <h2 class="mt-4">Requirements</h2>
+        <div class="requirement-box"><strong>Minimum:</strong> {{ game.minimum_requirements }}</div>
+        <div class="requirement-box"><strong>Recommended:</strong> {{ game.recommended_requirements }}</div>
+    </div>
+    <aside>
+        <h2>FPS Estimate</h2>
+        <div class="fps-grid">
+            {% for label, value in fps.items() %}
+                <div><span>{{ label|title }}</span><strong>{{ value }}</strong></div>
+            {% endfor %}
+        </div>
+        <h2 class="mt-4">PC Compatibility</h2>
+        <form class="compat-form" method="post">
+            <input class="form-control" name="processor" required placeholder="Processor, e.g. Intel i7">
+            <input class="form-control" name="graphics_card" required placeholder="Graphics Card, e.g. RTX 3060">
+            <input class="form-control" name="ram" required type="number" min="1" placeholder="RAM in GB">
+            <input class="form-control" name="storage" required type="number" min="1" placeholder="Storage in GB">
+            <button class="btn btn-accent w-100" type="submit">Check Compatibility</button>
+        </form>
+        {% if compatibility %}
+            <div class="compat-result mt-3">
+                <strong>{{ compatibility.status }}</strong>
+                <span>Recommended graphics: {{ compatibility.recommended_graphics }}</span>
+            </div>
+        {% endif %}
+    </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Server Error - GameVerse AI{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <p class="eyebrow">500</p>
+        <h1>Server Error</h1>
+        <p class="lead">GameVerse AI hit an unexpected error. The event has been logged for review.</p>
+        <a class="btn btn-accent" href="{{ url_for('home.index') }}">Return Home</a>
+    </div>
+</section>
+{% endblock %}
