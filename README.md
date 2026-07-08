@@ -42,7 +42,8 @@ The app still works without a key. Factual game lookups come from `Game_Database
 1. Push this folder to GitHub.
 2. Create a new Render web service from the repository.
 3. Render will use `render.yaml`.
-4. Set `GROQ_API_KEY` in Render environment variables.
+4. Confirm the Python version is `3.11.9`.
+5. Set `GROQ_API_KEY` in Render environment variables.
 
 Start command:
 
