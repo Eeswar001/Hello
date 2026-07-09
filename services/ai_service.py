@@ -42,9 +42,9 @@ Never generate hardcoded responses."""
         max_history_messages: int = 80,
         logger: logging.Logger | None = None,
     ):
-        self.api_key = api_key.strip()
-        self.model = model.strip()
-        self.base_url = base_url.rstrip("/")
+        self.api_key = (api_key or "").strip()
+        self.model = (model or "").strip()
+        self.base_url = (base_url or "").rstrip("/")
         self.timeout = timeout
         self.max_history_messages = max_history_messages
         self.logger = logger or logging.getLogger(__name__)
