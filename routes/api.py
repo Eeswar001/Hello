@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
+from uuid import uuid4
 
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, Response, current_app, jsonify, request, stream_with_context
 
-from config import Config
+from services.ai_service import AIServiceError
 from services.compatibility_service import CompatibilityService
 from services.database_service import GameQuery
 from services.fps_service import FPSService
-from services.groq_service import GroqService
 from services.recommendation_service import RecommendationService
 
 
@@ -91,46 +92,95 @@ def chat():
     payload = _json_payload()
     message = str(payload.get("message", "")).strip()
     history = payload.get("history", [])
+    session_id = _session_id(payload)
     if not message:
         return jsonify({"error": "Message is required"}), 400
     if not isinstance(history, list):
         return jsonify({"error": "History must be a list"}), 400
 
-    database = current_app.extensions["game_database"]
-    matches = database.query(GameQuery(search=message, sort="metacritic"))[:5]
-    lower_message = message.lower()
-    reasoning_terms = ("recommend", "compare", "similar", "tip", "ending", "why", "explain", "best", "suggest")
+    store = current_app.extensions["conversation_store"]
+    store.hydrate(session_id, _previous_history(history, message))
+    store.add(session_id, "user", message)
 
-    if matches and not any(term in lower_message for term in reasoning_terms):
-        response = _database_answer(message, matches)
-        source = "database"
-    else:
-        groq = GroqService(Config.GROQ_API_KEY, Config.GROQ_MODEL)
-        context_games = matches or database.get_all()[:8]
-        response = groq.chat(message, context_games)
-        source = "groq" if groq.available else "local"
-
-    return jsonify({"reply": response, "source": source})
+    context_games = _context_games(message)
+    ai_service = current_app.extensions["ai_service"]
+    try:
+        response = ai_service.complete_chat(store.get(session_id), context_games)
+    except AIServiceError as exc:
+        return jsonify({"error": str(exc)}), 503
+    store.add(session_id, "assistant", response)
+    return jsonify({"reply": response, "session_id": session_id, "source": "llm"})
 
 
-def _database_answer(message: str, matches: list[dict[str, Any]]) -> str:
-    game = matches[0]
-    return (
-        f"**{game['name']}** is in the GameVerse database.\n\n"
-        f"- Genre: {game['genre']}\n"
-        f"- Developer: {game['developer']}\n"
-        f"- Publisher: {game['publisher']}\n"
-        f"- Release: {game['release_date']}\n"
-        f"- Platforms: {game['platforms']}\n"
-        f"- Steam Rating: {game['steam_rating']}/10\n"
-        f"- Metacritic: {game['metacritic']}\n\n"
-        f"{game['story_summary']}"
-    )
+@api_bp.route("/chat/stream", methods=["POST"])
+def chat_stream():
+    payload = _json_payload()
+    message = str(payload.get("message", "")).strip()
+    history = payload.get("history", [])
+    session_id = _session_id(payload)
+    if not message:
+        return jsonify({"error": "Message is required"}), 400
+    if not isinstance(history, list):
+        return jsonify({"error": "History must be a list"}), 400
+
+    store = current_app.extensions["conversation_store"]
+    store.hydrate(session_id, _previous_history(history, message))
+    store.add(session_id, "user", message)
+    context_games = _context_games(message)
+    ai_service = current_app.extensions["ai_service"]
+
+    @stream_with_context
+    def generate():
+        assistant_reply: list[str] = []
+        try:
+            yield _sse("meta", {"session_id": session_id})
+            for chunk in ai_service.stream_chat(store.get(session_id), context_games):
+                assistant_reply.append(chunk)
+                yield _sse("token", {"content": chunk})
+            reply = "".join(assistant_reply).strip()
+            if not reply:
+                raise AIServiceError("The AI provider returned an empty response.")
+            store.add(session_id, "assistant", reply)
+            yield _sse("done", {"session_id": session_id})
+        except AIServiceError as exc:
+            current_app.logger.warning("Chat stream failed: %s", exc)
+            yield _sse("error", {"error": str(exc)})
+
+    return Response(generate(), mimetype="text/event-stream")
 
 
 def _json_payload() -> dict[str, Any]:
     payload = request.get_json(silent=True)
     return payload if isinstance(payload, dict) else {}
+
+
+def _session_id(payload: dict[str, Any]) -> str:
+    session_id = str(payload.get("session_id", "")).strip()
+    return session_id[:80] if session_id else uuid4().hex
+
+
+def _previous_history(history: list[Any], current_message: str) -> list[Any]:
+    if not history:
+        return history
+    last_message = history[-1]
+    if not isinstance(last_message, dict):
+        return history
+    if (
+        last_message.get("role") == "user"
+        and str(last_message.get("content", "")).strip() == current_message
+    ):
+        return history[:-1]
+    return history
+
+
+def _context_games(message: str) -> list[dict[str, Any]]:
+    database = current_app.extensions["game_database"]
+    matches = database.query(GameQuery(search=message, sort="metacritic"))[:5]
+    return matches or database.get_all()[:8]
+
+
+def _sse(event: str, payload: dict[str, Any]) -> str:
+    return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
 
 
 def _positive_int(value: Any, default: int, maximum: int) -> int:

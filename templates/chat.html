@@ -4,7 +4,7 @@
 <section class="chat-shell container py-4">
     <div class="chat-header">
         <div>
-            <p class="eyebrow">Hybrid Assistant</p>
+            <p class="eyebrow">Live AI Assistant</p>
             <h1>GameVerse Chat</h1>
         </div>
         <div class="chat-actions">
@@ -15,7 +15,10 @@
     <div class="chat-window" id="chatWindow" aria-live="polite"></div>
     <form class="chat-input-row" id="chatForm">
         <textarea id="chatInput" class="form-control" rows="2" placeholder="Ask about games, recommendations, specs, endings, or comparisons"></textarea>
-        <button class="btn btn-accent" type="submit">Send</button>
+        <div class="chat-submit-actions">
+            <button class="btn btn-outline-light" id="stopChat" type="button" disabled>Stop</button>
+            <button class="btn btn-accent" id="sendChat" type="submit">Send</button>
+        </div>
     </form>
 </section>
 {% endblock %}

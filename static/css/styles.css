@@ -96,10 +96,27 @@ a:hover { color: #7ff0d1; }
 .message { max-width: 82%; padding: .85rem 1rem; border-radius: 8px; margin-bottom: .8rem; border: 1px solid var(--line); }
 .message.user { margin-left: auto; background: rgba(32,214,163,.16); }
 .message.assistant { background: rgba(255,255,255,.09); }
-.message-tools { margin-top: .5rem; }
-.typing { color: var(--muted); }
+.message-meta { color: var(--muted); font-size: .74rem; margin-bottom: .35rem; }
+.message-content > :last-child { margin-bottom: 0; }
+.message-content table { width: 100%; margin: .75rem 0; border-collapse: collapse; }
+.message-content th, .message-content td { border: 1px solid var(--line); padding: .45rem .55rem; }
+.message-content th { background: rgba(255,255,255,.09); }
+.message-content code:not(pre code) { background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 5px; padding: .08rem .28rem; color: #f4d47c; }
+.message-content pre { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: .9rem; background: #0d1117; overflow-x: auto; }
+.message-tools { margin-top: .5rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+.code-copy { position: absolute; top: .45rem; right: .45rem; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,.11); color: var(--text); font-size: .75rem; padding: .2rem .45rem; }
+.typing, .typing-dots { color: var(--muted); }
+.typing-dots span { animation: blink 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: .18s; }
+.typing-dots span:nth-child(3) { animation-delay: .36s; }
 .chat-input-row { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: end; }
+.chat-submit-actions { display: flex; gap: .5rem; }
 .content-narrow { max-width: 840px; }
+
+@keyframes blink {
+    0%, 65%, 100% { opacity: .25; }
+    30% { opacity: 1; }
+}
 
 @media (max-width: 992px) {
     .hero-grid, .detail-grid { grid-template-columns: 1fr; }
@@ -112,4 +129,6 @@ a:hover { color: #7ff0d1; }
     .hero-band { min-height: auto; padding: 3rem 0; }
     .message { max-width: 100%; }
     .chat-header { align-items: start; flex-direction: column; }
+    .chat-submit-actions { justify-content: stretch; }
+    .chat-submit-actions .btn { flex: 1; }
 }

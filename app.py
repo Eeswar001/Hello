@@ -12,6 +12,8 @@ from routes.api import api_bp
 from routes.chat import chat_bp
 from routes.games import games_bp
 from routes.home import home_bp
+from services.ai_service import AIService
+from services.conversation_store import ConversationStore
 from services.database_service import DatabaseService
 
 
@@ -48,6 +50,17 @@ def create_app() -> Flask:
 
     database = DatabaseService(app.config["DATASET_PATH"])
     app.extensions["game_database"] = database
+    app.extensions["conversation_store"] = ConversationStore(
+        app.config["CHAT_HISTORY_LIMIT"]
+    )
+    app.extensions["ai_service"] = AIService(
+        api_key=app.config["LLM_API_KEY"],
+        model=app.config["LLM_MODEL"],
+        base_url=app.config["LLM_BASE_URL"],
+        timeout=app.config["LLM_TIMEOUT"],
+        max_history_messages=app.config["CHAT_HISTORY_LIMIT"],
+        logger=app.logger,
+    )
 
     app.register_blueprint(home_bp)
     app.register_blueprint(games_bp)
